@@ -1,0 +1,526 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Dots</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Dots">
+<meta name="application-name" content="Dots">
+<meta name="format-detection" content="telephone=no">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#f4f4f6">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0e0e11">
+<link rel="apple-touch-icon" href="data:image/png;base64,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">
+<link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22Dots%22%2C%22short_name%22%3A%22Dots%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230e0e11%22%2C%22theme_color%22%3A%22%230e0e11%22%7D">
+<style>
+:root{
+  --bg:#f4f4f6; --card:#ffffff; --text:#15151a; --muted:#6f6f78; --line:#e3e3e8; --gap:#d9d9df; --ring:#15151a;
+  --l2:#1f8a4c; --l1:#3dc074; --l0:#f2b62e; --lm1:#e85d4c; --lm2:#b02a2a;
+}
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#0e0e11; --card:#1a1a20; --text:#f2f2f5; --muted:#8f8f99; --line:#2a2a32; --gap:#33333b; --ring:#f2f2f5; }
+}
+*{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; touch-action:manipulation; }
+html,body{ height:100%; margin:0; overflow:hidden; overscroll-behavior:none; background:var(--bg); color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,sans-serif; -webkit-text-size-adjust:100%;
+  -webkit-user-select:none; user-select:none; }
+button{ font:inherit; color:inherit; cursor:pointer; }
+#app{ height:100%; display:flex; flex-direction:column; }
+@supports (height:100dvh){ #app{ height:100dvh; } }
+main{ flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; overscroll-behavior:contain;
+  padding:calc(env(safe-area-inset-top) + 14px) calc(16px + env(safe-area-inset-right)) 28px calc(16px + env(safe-area-inset-left)); }
+main[hidden]{ display:none; }
+
+header.top{ margin:6px 0 18px; }
+header.top.row{ display:flex; align-items:center; justify-content:space-between; }
+.eyebrow{ font-size:15px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; }
+h1{ margin:2px 0 0; font-size:32px; font-weight:800; letter-spacing:-.02em; }
+.status{ margin-top:8px; font-size:15px; color:var(--muted); min-height:20px; }
+
+.levels{ display:flex; flex-direction:column; gap:10px; }
+.lvl{ display:flex; align-items:center; gap:16px; min-height:66px; padding:0 18px; border-radius:18px; border:2px solid transparent;
+  background:var(--card); font-size:19px; font-weight:600; text-align:left; transition:transform .12s ease, border-color .12s ease; }
+.lvl:active{ transform:scale(.98); }
+.lvl[aria-pressed="true"]{ border-color:var(--ring); }
+.dot{ width:30px; height:30px; border-radius:50%; flex:none; }
+.link{ display:block; width:100%; min-height:48px; margin-top:16px; border:0; background:none; color:var(--muted); font-size:15px; font-weight:600; }
+
+.card{ background:var(--card); border-radius:18px; padding:14px; margin-bottom:14px; }
+.chips{ display:flex; gap:6px; margin-bottom:10px; }
+.chip{ flex:1; min-height:36px; border-radius:10px; border:0; background:var(--bg); color:var(--muted); font-size:13px; font-weight:700; }
+.chip[aria-pressed="true"]{ background:var(--text); color:var(--bg); }
+#chart{ width:100%; }
+#chart svg{ display:block; width:100%; height:auto; }
+.empty{ padding:40px 10px; text-align:center; color:var(--muted); font-size:15px; }
+.readout{ display:flex; justify-content:center; gap:22px; margin-top:8px; font-size:13px; color:var(--muted); font-variant-numeric:tabular-nums; }
+.readout b{ color:var(--text); font-weight:700; }
+
+.cal-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; }
+.cal-head button{ width:44px; height:44px; border:0; background:none; font-size:26px; line-height:1; color:var(--text); border-radius:12px; }
+.cal-head button:disabled{ color:var(--gap); }
+.cal-title{ font-size:17px; font-weight:700; }
+.cal-week{ display:grid; grid-template-columns:repeat(7,1fr); text-align:center; font-size:11px; font-weight:700; color:var(--muted); margin-bottom:4px; }
+.cal-grid{ display:grid; grid-template-columns:repeat(7,1fr); row-gap:2px; }
+.cell{ height:46px; border:0; background:none; padding:0; display:flex; align-items:center; justify-content:center; }
+.cell .circ{ width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+  font-size:14px; font-weight:600; color:var(--muted); border:1.5px solid var(--gap); }
+.cell.on .circ{ border-color:transparent; color:#fff; }
+.cell.on.mid .circ{ color:#1a1a1a; }
+.cell.today .circ{ box-shadow:0 0 0 2px var(--card), 0 0 0 4px var(--ring); }
+.cell.future .circ{ border-style:dashed; opacity:.45; }
+.cell:active .circ{ transform:scale(.92); }
+
+.strip-wrap{ overflow-x:auto; -webkit-overflow-scrolling:touch; overscroll-behavior-x:contain; padding-bottom:4px; }
+.strip{ display:flex; gap:3px; width:max-content; }
+.col{ display:flex; flex-direction:column; gap:3px; position:relative; padding-top:16px; }
+.col .ml{ position:absolute; top:0; left:0; font-size:10px; font-weight:700; color:var(--muted); white-space:nowrap; }
+.sq{ display:block; width:11px; height:11px; border-radius:3px; background:var(--gap); }
+.sq.none{ background:transparent; }
+.strip-title{ font-size:13px; font-weight:700; color:var(--muted); margin-bottom:6px; }
+
+nav.tabbar{ display:flex; border-top:1px solid var(--line); background:var(--card); padding-bottom:env(safe-area-inset-bottom); }
+nav.tabbar button{ flex:1; min-height:54px; border:0; background:none; color:var(--muted); font-size:12px; font-weight:700;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; }
+nav.tabbar button svg{ width:24px; height:24px; }
+nav.tabbar button[aria-selected="true"]{ color:var(--text); }
+.icon-btn{ width:44px; height:44px; border:0; background:none; display:flex; align-items:center; justify-content:center; color:var(--muted); border-radius:12px; }
+.icon-btn svg{ width:24px; height:24px; }
+
+.overlay{ position:fixed; inset:0; z-index:10; display:flex; flex-direction:column; justify-content:flex-end; }
+.overlay[hidden]{ display:none; }
+.backdrop{ position:absolute; inset:0; background:rgba(0,0,0,.45); }
+.panel{ position:relative; background:var(--card); border-radius:22px 22px 0 0; padding:18px 18px calc(18px + env(safe-area-inset-bottom)); }
+.sheet-title{ font-size:18px; font-weight:800; margin-bottom:14px; }
+.sheet-levels{ display:flex; gap:8px; }
+.sheet-levels .lvl{ flex:1; flex-direction:column; justify-content:center; gap:8px; min-height:80px; padding:8px 4px; font-size:12px; background:var(--bg); }
+.ghost{ width:100%; min-height:46px; margin-top:12px; border-radius:14px; border:1.5px solid var(--line); background:none; font-weight:600; font-size:15px; }
+.ghost.danger{ color:var(--lm1); border-color:var(--lm1); }
+.primary{ width:100%; min-height:48px; border-radius:14px; border:0; background:var(--text); color:var(--bg); font-weight:700; font-size:15px; }
+.hint{ font-size:13px; color:var(--muted); margin:0 0 12px; line-height:1.4; }
+textarea{ width:100%; margin-top:12px; min-height:110px; border-radius:14px; border:1.5px solid var(--line); background:var(--bg); color:var(--text);
+  font:inherit; font-size:16px; padding:10px; resize:none; -webkit-user-select:text; user-select:text; }
+.row2{ display:flex; gap:10px; }
+.msg{ min-height:18px; margin-top:10px; font-size:13px; color:var(--muted); text-align:center; }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <main id="view-today">
+    <header class="top">
+      <div class="eyebrow" id="today-weekday"></div>
+      <h1 id="today-date"></h1>
+      <div class="status" id="today-status"></div>
+    </header>
+    <div class="levels" id="today-levels"></div>
+    <button class="link" id="yesterday-btn">Rate yesterday</button>
+  </main>
+
+  <main id="view-progress" hidden>
+    <header class="top row">
+      <h1>Progress</h1>
+      <button class="icon-btn" id="backup-btn" aria-label="Backup">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M8 11l4 4 4-4"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+      </button>
+    </header>
+    <section class="card">
+      <div class="chips" id="range-chips"></div>
+      <div id="chart"></div>
+      <div class="readout" id="readout"></div>
+    </section>
+    <section class="card" id="cal-card">
+      <div class="cal-head">
+        <button id="cal-prev" aria-label="Previous month">&#8249;</button>
+        <div class="cal-title" id="cal-title"></div>
+        <button id="cal-next" aria-label="Next month">&#8250;</button>
+      </div>
+      <div class="cal-week"><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span></div>
+      <div class="cal-grid" id="cal-grid"></div>
+    </section>
+    <section class="card">
+      <div class="strip-title">Last 12 months</div>
+      <div class="strip-wrap" id="strip-wrap"><div class="strip" id="strip"></div></div>
+    </section>
+  </main>
+
+  <nav class="tabbar">
+    <button data-view="today" aria-selected="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/></svg>
+      Today
+    </button>
+    <button data-view="progress" aria-selected="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-6 4 3 5-7 4 4"/></svg>
+      Progress
+    </button>
+  </nav>
+</div>
+
+<div id="sheet" class="overlay" hidden>
+  <div class="backdrop" data-close></div>
+  <div class="panel">
+    <div class="sheet-title" id="sheet-title"></div>
+    <div class="sheet-levels" id="sheet-levels"></div>
+    <button class="ghost" id="sheet-clear">Clear</button>
+  </div>
+</div>
+
+<div id="backup" class="overlay" hidden>
+  <div class="backdrop" data-close></div>
+  <div class="panel">
+    <div class="sheet-title">Backup</div>
+    <p class="hint">Export copies everything as text. Paste that text here on another device and choose Merge or Replace to restore.</p>
+    <button class="primary" id="export-btn">Export to clipboard</button>
+    <textarea id="backup-text" placeholder="Paste backup text here…" autocapitalize="off" autocorrect="off" spellcheck="false"></textarea>
+    <div class="row2">
+      <button class="ghost" id="import-merge">Merge</button>
+      <button class="ghost danger" id="import-replace">Replace</button>
+    </div>
+    <div class="msg" id="backup-msg"></div>
+  </div>
+</div>
+
+<script>
+(function(){
+'use strict';
+
+var KEY = 'dots.v1';
+var LEVELS = [
+  { v: 2,  label: 'Great', c: 'var(--l2)'  },
+  { v: 1,  label: 'Good',  c: 'var(--l1)'  },
+  { v: 0,  label: 'OK',    c: 'var(--l0)'  },
+  { v: -1, label: 'Off',   c: 'var(--lm1)' },
+  { v: -2, label: 'Rough', c: 'var(--lm2)' }
+];
+var RANGES = [
+  { label: '1M', days: 30 }, { label: '3M', days: 91 }, { label: '6M', days: 182 }, { label: '1Y', days: 365 }, { label: 'All', days: 0 }
+];
+var TAU_SHORT = 7, TAU_LONG = 42;
+var MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+var MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+var DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+
+function $(s){ return document.querySelector(s); }
+function levelOf(v){ for (var i = 0; i < LEVELS.length; i++) if (LEVELS[i].v === v) return LEVELS[i]; return null; }
+function colorOf(v){ var L = levelOf(v); return L ? L.c : 'var(--gap)'; }
+
+/* ---------- store ---------- */
+function load(){
+  try {
+    var s = JSON.parse(localStorage.getItem(KEY));
+    if (s && s.v === 1 && s.days && typeof s.days === 'object') return s;
+  } catch (e) {}
+  return { v: 1, days: {} };
+}
+function save(){ try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
+
+var state = load();
+var range = 91;
+var calMonth = startOfMonth(new Date());
+var sheetKey = null;
+var lastToday = todayKey();
+
+/* ---------- dates ---------- */
+function pad(n){ return n < 10 ? '0' + n : '' + n; }
+function keyOf(d){ return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
+function parseKey(k){ var p = k.split('-'); return new Date(+p[0], +p[1] - 1, +p[2]); }
+function startOfDay(d){ return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
+function startOfMonth(d){ return new Date(d.getFullYear(), d.getMonth(), 1); }
+function addDays(d, n){ var r = new Date(d.getFullYear(), d.getMonth(), d.getDate() + n); return r; }
+function dayDiff(a, b){ return Math.round((startOfDay(b) - startOfDay(a)) / 86400000); }
+function todayKey(){ return keyOf(new Date()); }
+function longDate(d){ return DAYS[d.getDay()] + ', ' + d.getDate() + ' ' + MONTHS[d.getMonth()]; }
+
+/* ---------- mutations ---------- */
+function setLevel(k, v){
+  if (v === null || v === undefined) delete state.days[k]; else state.days[k] = v;
+  save();
+  renderAll();
+}
+function toggleLevel(k, v){ setLevel(k, state.days[k] === v ? null : v); }
+
+/* ---------- trend ---------- */
+function series(){
+  var keys = Object.keys(state.days).sort();
+  var out = [], s = null, l = null;
+  var kS = 1 - Math.exp(-1 / TAU_SHORT), kL = 1 - Math.exp(-1 / TAU_LONG);
+  for (var i = 0; i < keys.length; i++) {
+    var x = state.days[keys[i]];
+    if (s === null) { s = x; l = x; } else { s += (x - s) * kS; l += (x - l) * kL; }
+    out.push({ k: keys[i], x: x, s: s, l: l });
+  }
+  return out;
+}
+function plural(n){ return n + (n === 1 ? ' day' : ' days'); }
+function fmt(n){ return (n >= 0 ? '+' : '−') + Math.abs(n).toFixed(1); }
+
+/* ---------- today view ---------- */
+function renderToday(){
+  var now = new Date(), tk = keyOf(now);
+  $('#today-weekday').textContent = DAYS[now.getDay()];
+  $('#today-date').textContent = now.getDate() + ' ' + MONTHS[now.getMonth()];
+  var cur = state.days[tk];
+  $('#today-status').textContent = cur === undefined ? 'Not rated yet' : 'Rated as ' + levelOf(cur).label + ' · tap again to clear';
+  var html = '';
+  LEVELS.forEach(function(L){
+    html += '<button class="lvl" data-v="' + L.v + '" aria-pressed="' + (cur === L.v) + '">' +
+      '<span class="dot" style="background:' + L.c + '"></span>' + L.label + '</button>';
+  });
+  $('#today-levels').innerHTML = html;
+}
+
+/* ---------- chart ---------- */
+function renderChart(){
+  var el = $('#chart'), ro = $('#readout');
+  var ser = series();
+  if (ser.length < 2) {
+    el.innerHTML = '<div class="empty">Rate a few days to see your trend.</div>';
+    ro.innerHTML = '';
+    return;
+  }
+  var W = Math.max(el.clientWidth || 0, 280), H = 210;
+  var padL = 30, padR = 12, padT = 12, padB = 24;
+  var pw = W - padL - padR, ph = H - padT - padB;
+  var today = startOfDay(new Date());
+  var start, N;
+  if (range > 0) { N = range; start = addDays(today, -(N - 1)); }
+  else { start = parseKey(ser[0].k); N = Math.max(dayDiff(start, today) + 1, 14); }
+  function xOf(d){ return padL + (dayDiff(start, d) / (N - 1)) * pw; }
+  function yOf(v){ return padT + ((2 - v) / 4) * ph; }
+
+  var pts = ser.filter(function(p){ return dayDiff(start, parseKey(p.k)) >= 0; });
+  if (pts.length) {
+    var fi = ser.indexOf(pts[0]);
+    if (fi > 0) pts.unshift(ser[fi - 1]);
+  }
+
+  var svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" xmlns="http://www.w3.org/2000/svg">';
+  svg += '<defs><clipPath id="clip"><rect x="' + padL + '" y="0" width="' + pw + '" height="' + H + '"/></clipPath></defs>';
+  // bands
+  LEVELS.forEach(function(L){
+    var top = Math.min(2, L.v + 0.5), bot = Math.max(-2, L.v - 0.5);
+    svg += '<rect x="' + padL + '" y="' + yOf(top) + '" width="' + pw + '" height="' + (yOf(bot) - yOf(top)) + '" fill="' + L.c + '" opacity="0.10"/>';
+  });
+  // y labels + gridlines
+  [2, 1, 0, -1, -2].forEach(function(v){
+    var y = yOf(v);
+    svg += '<line x1="' + padL + '" x2="' + (W - padR) + '" y1="' + y + '" y2="' + y + '" stroke="var(--line)" stroke-width="1"' + (v === 0 ? ' stroke-dasharray="3 3"' : '') + '/>';
+    svg += '<text x="' + (padL - 8) + '" y="' + (y + 3.5) + '" text-anchor="end" font-size="10" fill="var(--muted)">' + (v > 0 ? '+' + v : v) + '</text>';
+  });
+  // month ticks
+  var ticks = [];
+  var m = new Date(start.getFullYear(), start.getMonth(), 1);
+  if (dayDiff(start, m) < 0) m = new Date(m.getFullYear(), m.getMonth() + 1, 1);
+  while (dayDiff(m, today) >= 0) { ticks.push(m); m = new Date(m.getFullYear(), m.getMonth() + 1, 1); }
+  var every = ticks.length > 13 ? 3 : ticks.length > 7 ? 2 : 1;
+  ticks.forEach(function(t, i){
+    var x = xOf(t);
+    svg += '<line x1="' + x + '" x2="' + x + '" y1="' + padT + '" y2="' + (padT + ph) + '" stroke="var(--line)" stroke-width="1"/>';
+    if (i % every === 0) {
+      var lab = MON[t.getMonth()] + (t.getMonth() === 0 || range === 0 || range > 182 ? ' ' + String(t.getFullYear()).slice(2) : '');
+      svg += '<text x="' + x + '" y="' + (H - 6) + '" text-anchor="middle" font-size="10" fill="var(--muted)">' + lab + '</text>';
+    }
+  });
+  if (pts.length) {
+    var pl = '', ps = '';
+    pts.forEach(function(p){
+      var d = parseKey(p.k), x = xOf(d);
+      pl += x.toFixed(1) + ',' + yOf(p.l).toFixed(1) + ' ';
+      ps += x.toFixed(1) + ',' + yOf(p.s).toFixed(1) + ' ';
+    });
+    svg += '<g clip-path="url(#clip)">';
+    svg += '<polyline points="' + pl + '" fill="none" stroke="var(--muted)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" opacity="0.7"/>';
+    svg += '<polyline points="' + ps + '" fill="none" stroke="var(--text)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>';
+    if (N <= 190) {
+      pts.forEach(function(p){
+        var d = parseKey(p.k);
+        if (dayDiff(start, d) < 0) return;
+        svg += '<circle cx="' + xOf(d).toFixed(1) + '" cy="' + yOf(p.s).toFixed(1) + '" r="3.2" fill="' + colorOf(p.x) + '" stroke="var(--card)" stroke-width="1.2"/>';
+      });
+    }
+    svg += '</g>';
+  } else {
+    svg += '<text x="' + (padL + pw / 2) + '" y="' + (padT + ph / 2) + '" text-anchor="middle" font-size="13" fill="var(--muted)">No rated days in this range</text>';
+  }
+  // legend
+  svg += '<line x1="' + (W - padR - 92) + '" x2="' + (W - padR - 76) + '" y1="' + (padT - 3) + '" y2="' + (padT - 3) + '" stroke="var(--text)" stroke-width="2.5"/>';
+  svg += '<text x="' + (W - padR - 72) + '" y="' + (padT) + '" font-size="10" fill="var(--muted)">7d</text>';
+  svg += '<line x1="' + (W - padR - 50) + '" x2="' + (W - padR - 34) + '" y1="' + (padT - 3) + '" y2="' + (padT - 3) + '" stroke="var(--muted)" stroke-width="2" opacity="0.7"/>';
+  svg += '<text x="' + (W - padR - 30) + '" y="' + (padT) + '" font-size="10" fill="var(--muted)">42d</text>';
+  svg += '</svg>';
+  el.innerHTML = svg;
+
+  var last = ser[ser.length - 1];
+  ro.innerHTML = '<span>7d <b>' + fmt(last.s) + '</b></span><span>42d <b>' + fmt(last.l) + '</b></span><span>' + plural(ser.length) + ' rated</span>';
+}
+
+function renderChips(){
+  var html = '';
+  RANGES.forEach(function(r){ html += '<button class="chip" data-days="' + r.days + '" aria-pressed="' + (r.days === range) + '">' + r.label + '</button>'; });
+  $('#range-chips').innerHTML = html;
+}
+
+/* ---------- calendar ---------- */
+function renderCal(){
+  var y = calMonth.getFullYear(), mo = calMonth.getMonth();
+  $('#cal-title').textContent = MONTHS[mo] + ' ' + y;
+  var lead = (calMonth.getDay() + 6) % 7;
+  var dim = new Date(y, mo + 1, 0).getDate();
+  var tk = todayKey(), html = '';
+  for (var i = 0; i < lead; i++) html += '<div class="cell blank"></div>';
+  for (var d = 1; d <= dim; d++) {
+    var k = keyOf(new Date(y, mo, d)), v = state.days[k], future = k > tk;
+    var cls = 'cell' + (k === tk ? ' today' : '') + (future ? ' future' : '') + (v !== undefined ? ' on' : '') + (v === 0 ? ' mid' : '');
+    html += '<button class="' + cls + '" data-k="' + k + '"' + (future ? ' disabled' : '') + '>' +
+      '<span class="circ"' + (v !== undefined ? ' style="background:' + colorOf(v) + '"' : '') + '>' + d + '</span></button>';
+  }
+  $('#cal-grid').innerHTML = html;
+  var now = startOfMonth(new Date());
+  $('#cal-next').disabled = calMonth >= now;
+}
+
+/* ---------- year strip ---------- */
+function renderStrip(){
+  var today = startOfDay(new Date()), tk = keyOf(today);
+  var dow = (today.getDay() + 6) % 7;
+  var start = addDays(addDays(today, -dow), -52 * 7);
+  var html = '', lastLabelCol = -10;
+  for (var w = 0; w < 53; w++) {
+    var cells = '', label = '';
+    for (var r = 0; r < 7; r++) {
+      var d = addDays(start, w * 7 + r), k = keyOf(d);
+      if (d.getDate() === 1 && w - lastLabelCol >= 3) { label = MON[d.getMonth()]; lastLabelCol = w; }
+      if (k > tk) { cells += '<i class="sq none"></i>'; continue; }
+      var v = state.days[k];
+      cells += '<i class="sq"' + (v !== undefined ? ' style="background:' + colorOf(v) + '"' : '') + '></i>';
+    }
+    html += '<div class="col">' + (label ? '<span class="ml">' + label + '</span>' : '') + cells + '</div>';
+  }
+  $('#strip').innerHTML = html;
+  var wrap = $('#strip-wrap');
+  wrap.scrollLeft = wrap.scrollWidth;
+}
+
+/* ---------- sheet ---------- */
+function openSheet(k){
+  sheetKey = k;
+  var d = parseKey(k), cur = state.days[k];
+  $('#sheet-title').textContent = longDate(d) + (k === todayKey() ? ' · Today' : '');
+  var html = '';
+  LEVELS.forEach(function(L){
+    html += '<button class="lvl" data-v="' + L.v + '" aria-pressed="' + (cur === L.v) + '">' +
+      '<span class="dot" style="background:' + L.c + '"></span>' + L.label + '</button>';
+  });
+  $('#sheet-levels').innerHTML = html;
+  $('#sheet-clear').hidden = cur === undefined;
+  $('#sheet').hidden = false;
+}
+function closeSheet(){ $('#sheet').hidden = true; sheetKey = null; }
+
+/* ---------- backup ---------- */
+function parseBackup(text){
+  var o;
+  try { o = JSON.parse(text); } catch (e) { throw new Error('That is not valid backup text.'); }
+  if (!o || o.v !== 1 || !o.days || typeof o.days !== 'object') throw new Error('Unrecognised backup format.');
+  var days = {}, n = 0;
+  for (var k in o.days) {
+    var v = o.days[k];
+    if (/^\d{4}-\d{2}-\d{2}$/.test(k) && typeof v === 'number' && v === Math.round(v) && v >= -2 && v <= 2) { days[k] = v; n++; }
+  }
+  if (!n) throw new Error('No days found in that text.');
+  return days;
+}
+function doExport(){
+  var text = JSON.stringify(state), ta = $('#backup-text'), msg = $('#backup-msg');
+  ta.value = text;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(function(){ msg.textContent = 'Copied ' + plural(Object.keys(state.days).length) + ' to clipboard.'; },
+      function(){ ta.focus(); ta.select(); msg.textContent = 'Select the text above and copy it.'; });
+  } else { ta.focus(); ta.select(); msg.textContent = 'Select the text above and copy it.'; }
+}
+function doImport(replace){
+  var msg = $('#backup-msg');
+  try {
+    var days = parseBackup($('#backup-text').value.trim());
+    var n = Object.keys(days).length;
+    if (replace && !confirm('Replace all ' + Object.keys(state.days).length + ' existing days with ' + n + ' from the backup?')) return;
+    if (replace) state.days = days; else for (var k in days) state.days[k] = days[k];
+    save(); renderAll();
+    msg.textContent = (replace ? 'Replaced with ' : 'Merged ') + plural(n) + '.';
+  } catch (e) { msg.textContent = e.message; }
+}
+
+/* ---------- views ---------- */
+function show(view){
+  $('#view-today').hidden = view !== 'today';
+  $('#view-progress').hidden = view !== 'progress';
+  document.querySelectorAll('nav.tabbar button').forEach(function(b){ b.setAttribute('aria-selected', b.dataset.view === view); });
+  if (view === 'progress') renderProgress();
+}
+function renderProgress(){
+  if ($('#view-progress').hidden) return;
+  renderChips(); renderChart(); renderCal(); renderStrip();
+}
+function renderAll(){ renderToday(); renderProgress(); }
+
+/* ---------- events ---------- */
+document.querySelectorAll('nav.tabbar button').forEach(function(b){ b.addEventListener('click', function(){ show(b.dataset.view); }); });
+
+$('#today-levels').addEventListener('click', function(e){
+  var b = e.target.closest('.lvl'); if (!b) return;
+  toggleLevel(todayKey(), +b.dataset.v);
+});
+$('#yesterday-btn').addEventListener('click', function(){ openSheet(keyOf(addDays(new Date(), -1))); });
+
+$('#range-chips').addEventListener('click', function(e){
+  var b = e.target.closest('.chip'); if (!b) return;
+  range = +b.dataset.days; renderChips(); renderChart();
+});
+$('#cal-prev').addEventListener('click', function(){ calMonth = new Date(calMonth.getFullYear(), calMonth.getMonth() - 1, 1); renderCal(); });
+$('#cal-next').addEventListener('click', function(){
+  var next = new Date(calMonth.getFullYear(), calMonth.getMonth() + 1, 1);
+  if (next <= startOfMonth(new Date())) { calMonth = next; renderCal(); }
+});
+$('#cal-grid').addEventListener('click', function(e){
+  var b = e.target.closest('.cell[data-k]'); if (!b || b.disabled) return;
+  openSheet(b.dataset.k);
+});
+(function(){
+  var x0 = null, y0 = null, card = $('#cal-card');
+  card.addEventListener('touchstart', function(e){ x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; }, { passive: true });
+  card.addEventListener('touchend', function(e){
+    if (x0 === null) return;
+    var dx = e.changedTouches[0].clientX - x0, dy = e.changedTouches[0].clientY - y0; x0 = y0 = null;
+    if (Math.abs(dx) < 50 || Math.abs(dy) > Math.abs(dx)) return;
+    if (dx < 0) $('#cal-next').click(); else $('#cal-prev').click();
+  }, { passive: true });
+})();
+
+$('#sheet-levels').addEventListener('click', function(e){
+  var b = e.target.closest('.lvl'); if (!b || sheetKey === null) return;
+  toggleLevel(sheetKey, +b.dataset.v); closeSheet();
+});
+$('#sheet-clear').addEventListener('click', function(){ if (sheetKey !== null) setLevel(sheetKey, null); closeSheet(); });
+document.querySelectorAll('[data-close]').forEach(function(el){
+  el.addEventListener('click', function(){ el.parentNode.hidden = true; sheetKey = null; });
+});
+
+$('#backup-btn').addEventListener('click', function(){ $('#backup-msg').textContent = ''; $('#backup-text').value = ''; $('#backup').hidden = false; });
+$('#export-btn').addEventListener('click', doExport);
+$('#import-merge').addEventListener('click', function(){ doImport(false); });
+$('#import-replace').addEventListener('click', function(){ doImport(true); });
+
+window.addEventListener('resize', function(){ if (!$('#view-progress').hidden) renderChart(); });
+document.addEventListener('visibilitychange', function(){
+  if (document.visibilityState === 'visible' && todayKey() !== lastToday) {
+    lastToday = todayKey(); calMonth = startOfMonth(new Date()); renderAll();
+  }
+});
+window.addEventListener('storage', function(e){ if (e.key === KEY) { state = load(); renderAll(); } });
+
+renderAll();
+})();
+</script>
+</body>
+</html>
