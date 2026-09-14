@@ -47,6 +47,16 @@ h1{ margin:2px 0 0; font-size:32px; font-weight:800; letter-spacing:-.02em; }
 .dot{ width:30px; height:30px; border-radius:50%; flex:none; }
 .link{ display:block; width:100%; min-height:48px; margin-top:16px; border:0; background:none; color:var(--muted); font-size:15px; font-weight:600; }
 
+.streak{ display:flex; align-items:center; gap:8px; margin:-6px 0 16px; padding:10px 14px; border-radius:14px; background:var(--card); color:var(--muted); font-size:14px; }
+.streak svg{ width:18px; height:18px; color:var(--l0); flex:none; }
+.streak b{ color:var(--text); }
+.streak.warn{ color:var(--text); box-shadow:inset 0 0 0 1.5px var(--l0); }
+.score-head{ display:flex; align-items:baseline; gap:12px; margin:6px 0 4px 2px; min-height:30px; }
+.score-num{ font-size:34px; font-weight:800; letter-spacing:-.02em; line-height:1; }
+.score-delta{ font-size:14px; font-weight:700; color:var(--muted); }
+.score-delta.up{ color:var(--l2); } .score-delta.down{ color:var(--lm1); }
+.score-delta span{ font-weight:500; color:var(--muted); }
+.readout svg{ width:14px; height:14px; color:var(--l0); vertical-align:-2px; }
 .card{ background:var(--card); border-radius:18px; padding:14px; margin-bottom:14px; }
 .chips{ display:flex; gap:6px; margin-bottom:10px; }
 .chip{ flex:1; min-height:36px; border-radius:10px; border:0; background:var(--bg); color:var(--muted); font-size:13px; font-weight:700; }
@@ -114,6 +124,7 @@ textarea{ width:100%; margin-top:12px; min-height:110px; border-radius:14px; bor
       <h1 id="today-date"></h1>
       <div class="status" id="today-status"></div>
     </header>
+    <div class="streak" id="today-streak"></div>
     <div class="levels" id="today-levels"></div>
     <button class="link" id="yesterday-btn">Rate yesterday</button>
   </main>
@@ -127,6 +138,7 @@ textarea{ width:100%; margin-top:12px; min-height:110px; border-radius:14px; bor
     </header>
     <section class="card">
       <div class="chips" id="range-chips"></div>
+      <div class="score-head" id="score-head"></div>
       <div id="chart"></div>
       <div class="readout" id="readout"></div>
     </section>
@@ -196,7 +208,6 @@ var LEVELS = [
 var RANGES = [
   { label: '1M', days: 30 }, { label: '3M', days: 91 }, { label: '6M', days: 182 }, { label: '1Y', days: 365 }, { label: 'All', days: 0 }
 ];
-var TAU_SHORT = 7, TAU_LONG = 42;
 var MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 var MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 var DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
@@ -240,20 +251,38 @@ function setLevel(k, v){
 }
 function toggleLevel(k, v){ setLevel(k, state.days[k] === v ? null : v); }
 
-/* ---------- trend ---------- */
-function series(){
+/* ---------- score ---------- */
+var POINTS = { '2': 3, '1': 2, '0': 1, '-1': -1, '-2': -3 };
+var TAU = 42, DECAY = Math.exp(-1 / TAU), SCALE = 100 * (1 - DECAY) / 3;
+
+// One entry per calendar day from the first rated day to today. Unrated days contribute 0 and still decay.
+// Today is only included once it has been rated.
+function scoreSeries(){
   var keys = Object.keys(state.days).sort();
-  var out = [], s = null, l = null;
-  var kS = 1 - Math.exp(-1 / TAU_SHORT), kL = 1 - Math.exp(-1 / TAU_LONG);
-  for (var i = 0; i < keys.length; i++) {
-    var x = state.days[keys[i]];
-    if (s === null) { s = x; l = x; } else { s += (x - s) * kS; l += (x - l) * kL; }
-    out.push({ k: keys[i], x: x, s: s, l: l });
+  if (!keys.length) return [];
+  var today = startOfDay(new Date()), tk = keyOf(today);
+  var d = parseKey(keys[0]), out = [], raw = 0;
+  while (dayDiff(d, today) >= 0) {
+    var k = keyOf(d), x = state.days[k];
+    if (k === tk && x === undefined) break;
+    raw = raw * DECAY + (x === undefined ? 0 : POINTS[String(x)]);
+    if (raw < 0) raw = 0;
+    out.push({ k: k, d: d, x: x, score: raw * SCALE });
+    d = addDays(d, 1);
   }
   return out;
 }
+function currentScore(){ var ser = scoreSeries(); return ser.length ? ser[ser.length - 1].score : 0; }
+function streak(){
+  var d = startOfDay(new Date());
+  if (state.days[keyOf(d)] === undefined) d = addDays(d, -1);
+  var n = 0;
+  while (state.days[keyOf(d)] !== undefined) { n++; d = addDays(d, -1); }
+  return n;
+}
 function plural(n){ return n + (n === 1 ? ' day' : ' days'); }
-function fmt(n){ return (n >= 0 ? '+' : '−') + Math.abs(n).toFixed(1); }
+function fmtDelta(n){ var r = Math.round(n); return (r > 0 ? '+' : r < 0 ? '\u2212' : '\u00b1') + Math.abs(r); }
+var FLAME = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c1 4 5 6 5 11a5 5 0 0 1-10 0c0-2 1-3 1-3s.5 2 2 2c0-3-1-5 2-10z"/></svg>';
 
 /* ---------- today view ---------- */
 function renderToday(){
@@ -261,21 +290,27 @@ function renderToday(){
   $('#today-weekday').textContent = DAYS[now.getDay()];
   $('#today-date').textContent = now.getDate() + ' ' + MONTHS[now.getMonth()];
   var cur = state.days[tk];
-  $('#today-status').textContent = cur === undefined ? 'Not rated yet' : 'Rated as ' + levelOf(cur).label + ' · tap again to clear';
+  $('#today-status').textContent = cur === undefined ? 'Not rated yet' : 'Rated as ' + levelOf(cur).label + ' \u00b7 tap again to clear';
   var html = '';
   LEVELS.forEach(function(L){
     html += '<button class="lvl" data-v="' + L.v + '" aria-pressed="' + (cur === L.v) + '">' +
       '<span class="dot" style="background:' + L.c + '"></span>' + L.label + '</button>';
   });
   $('#today-levels').innerHTML = html;
+  var n = streak(), el = $('#today-streak');
+  el.className = 'streak' + (cur === undefined && n > 0 ? ' warn' : '');
+  if (n === 0) el.innerHTML = FLAME + '<span>No streak yet \u00b7 rate today to start one</span>';
+  else if (cur === undefined) el.innerHTML = FLAME + '<span><b>' + plural(n) + '</b> streak \u00b7 rate today to keep it</span>';
+  else el.innerHTML = FLAME + '<span><b>' + plural(n) + '</b> streak \u00b7 score <b>' + Math.round(currentScore()) + '</b></span>';
 }
 
 /* ---------- chart ---------- */
 function renderChart(){
-  var el = $('#chart'), ro = $('#readout');
-  var ser = series();
+  var el = $('#chart'), ro = $('#readout'), hd = $('#score-head');
+  var ser = scoreSeries();
   if (ser.length < 2) {
-    el.innerHTML = '<div class="empty">Rate a few days to see your trend.</div>';
+    hd.innerHTML = '';
+    el.innerHTML = '<div class="empty">Rate a few days to see your score build up.</div>';
     ro.innerHTML = '';
     return;
   }
@@ -283,31 +318,35 @@ function renderChart(){
   var padL = 30, padR = 12, padT = 12, padB = 24;
   var pw = W - padL - padR, ph = H - padT - padB;
   var today = startOfDay(new Date());
-  var start, N;
-  if (range > 0) { N = range; start = addDays(today, -(N - 1)); }
-  else { start = parseKey(ser[0].k); N = Math.max(dayDiff(start, today) + 1, 14); }
-  function xOf(d){ return padL + (dayDiff(start, d) / (N - 1)) * pw; }
-  function yOf(v){ return padT + ((2 - v) / 4) * ph; }
+  var start, N, rangeLabel = 'all time';
+  if (range > 0) { N = range; start = addDays(today, -(N - 1)); RANGES.forEach(function(r){ if (r.days === range) rangeLabel = r.label; }); }
+  else { start = ser[0].d; N = Math.max(dayDiff(start, today) + 1, 14); }
 
-  var pts = ser.filter(function(p){ return dayDiff(start, parseKey(p.k)) >= 0; });
-  if (pts.length) {
-    var fi = ser.indexOf(pts[0]);
-    if (fi > 0) pts.unshift(ser[fi - 1]);
-  }
+  var pts = ser.filter(function(p){ return dayDiff(start, p.d) >= 0; });
+  var base = pts.length ? ser.indexOf(pts[0]) : -1;
+  if (base > 0) pts.unshift(ser[base - 1]);
+  var last = ser[ser.length - 1];
+  var from = pts.length ? pts[0].score : 0;
+  var delta = last.score - from;
+
+  var maxS = 0; pts.forEach(function(p){ if (p.score > maxS) maxS = p.score; });
+  var ymax = Math.max(20, Math.min(100, Math.ceil(maxS / 20) * 20));
+  function xOf(d){ return padL + (dayDiff(start, d) / (N - 1)) * pw; }
+  function yOf(v){ return padT + (1 - v / ymax) * ph; }
+
+  hd.innerHTML = '<div class="score-num">' + Math.round(last.score) + '</div>' +
+    '<div class="score-delta ' + (delta > 0.5 ? 'up' : delta < -0.5 ? 'down' : '') + '">' +
+    (delta > 0.5 ? '\u25b2 ' : delta < -0.5 ? '\u25bc ' : '') + fmtDelta(delta) + ' <span>over ' + rangeLabel + '</span></div>';
 
   var svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" xmlns="http://www.w3.org/2000/svg">';
-  svg += '<defs><clipPath id="clip"><rect x="' + padL + '" y="0" width="' + pw + '" height="' + H + '"/></clipPath></defs>';
-  // bands
-  LEVELS.forEach(function(L){
-    var top = Math.min(2, L.v + 0.5), bot = Math.max(-2, L.v - 0.5);
-    svg += '<rect x="' + padL + '" y="' + yOf(top) + '" width="' + pw + '" height="' + (yOf(bot) - yOf(top)) + '" fill="' + L.c + '" opacity="0.10"/>';
-  });
-  // y labels + gridlines
-  [2, 1, 0, -1, -2].forEach(function(v){
-    var y = yOf(v);
-    svg += '<line x1="' + padL + '" x2="' + (W - padR) + '" y1="' + y + '" y2="' + y + '" stroke="var(--line)" stroke-width="1"' + (v === 0 ? ' stroke-dasharray="3 3"' : '') + '/>';
-    svg += '<text x="' + (padL - 8) + '" y="' + (y + 3.5) + '" text-anchor="end" font-size="10" fill="var(--muted)">' + (v > 0 ? '+' + v : v) + '</text>';
-  });
+  svg += '<defs><clipPath id="clip"><rect x="' + padL + '" y="0" width="' + pw + '" height="' + H + '"/></clipPath>' +
+    '<linearGradient id="fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--l1)" stop-opacity="0.45"/><stop offset="1" stop-color="var(--l1)" stop-opacity="0.05"/></linearGradient></defs>';
+  // gridlines + y labels
+  for (var i = 0; i <= 4; i++) {
+    var v = ymax * i / 4, y = yOf(v);
+    svg += '<line x1="' + padL + '" x2="' + (W - padR) + '" y1="' + y + '" y2="' + y + '" stroke="var(--line)" stroke-width="1"/>';
+    svg += '<text x="' + (padL - 8) + '" y="' + (y + 3.5) + '" text-anchor="end" font-size="10" fill="var(--muted)">' + Math.round(v) + '</text>';
+  }
   // month ticks
   var ticks = [];
   var m = new Date(start.getFullYear(), start.getMonth(), 1);
@@ -323,36 +362,33 @@ function renderChart(){
     }
   });
   if (pts.length) {
-    var pl = '', ps = '';
+    var line = '', first = null, lastX = 0;
     pts.forEach(function(p){
-      var d = parseKey(p.k), x = xOf(d);
-      pl += x.toFixed(1) + ',' + yOf(p.l).toFixed(1) + ' ';
-      ps += x.toFixed(1) + ',' + yOf(p.s).toFixed(1) + ' ';
+      var x = xOf(p.d), y = yOf(p.score);
+      if (first === null) first = x;
+      line += x.toFixed(1) + ',' + y.toFixed(1) + ' ';
+      lastX = x;
     });
+    var baseY = yOf(0);
     svg += '<g clip-path="url(#clip)">';
-    svg += '<polyline points="' + pl + '" fill="none" stroke="var(--muted)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" opacity="0.7"/>';
-    svg += '<polyline points="' + ps + '" fill="none" stroke="var(--text)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>';
+    svg += '<polygon points="' + first.toFixed(1) + ',' + baseY + ' ' + line + lastX.toFixed(1) + ',' + baseY + '" fill="url(#fill)"/>';
+    svg += '<polyline points="' + line + '" fill="none" stroke="var(--l1)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>';
     if (N <= 190) {
       pts.forEach(function(p){
-        var d = parseKey(p.k);
-        if (dayDiff(start, d) < 0) return;
-        svg += '<circle cx="' + xOf(d).toFixed(1) + '" cy="' + yOf(p.s).toFixed(1) + '" r="3.2" fill="' + colorOf(p.x) + '" stroke="var(--card)" stroke-width="1.2"/>';
+        if (p.x === undefined || dayDiff(start, p.d) < 0) return;
+        svg += '<circle cx="' + xOf(p.d).toFixed(1) + '" cy="' + yOf(p.score).toFixed(1) + '" r="3" fill="' + colorOf(p.x) + '" stroke="var(--card)" stroke-width="1.2"/>';
       });
     }
+    svg += '<circle cx="' + lastX.toFixed(1) + '" cy="' + yOf(last.score).toFixed(1) + '" r="6" fill="var(--l1)" opacity="0.3"/>';
     svg += '</g>';
   } else {
     svg += '<text x="' + (padL + pw / 2) + '" y="' + (padT + ph / 2) + '" text-anchor="middle" font-size="13" fill="var(--muted)">No rated days in this range</text>';
   }
-  // legend
-  svg += '<line x1="' + (W - padR - 92) + '" x2="' + (W - padR - 76) + '" y1="' + (padT - 3) + '" y2="' + (padT - 3) + '" stroke="var(--text)" stroke-width="2.5"/>';
-  svg += '<text x="' + (W - padR - 72) + '" y="' + (padT) + '" font-size="10" fill="var(--muted)">7d</text>';
-  svg += '<line x1="' + (W - padR - 50) + '" x2="' + (W - padR - 34) + '" y1="' + (padT - 3) + '" y2="' + (padT - 3) + '" stroke="var(--muted)" stroke-width="2" opacity="0.7"/>';
-  svg += '<text x="' + (W - padR - 30) + '" y="' + (padT) + '" font-size="10" fill="var(--muted)">42d</text>';
   svg += '</svg>';
   el.innerHTML = svg;
 
-  var last = ser[ser.length - 1];
-  ro.innerHTML = '<span>7d <b>' + fmt(last.s) + '</b></span><span>42d <b>' + fmt(last.l) + '</b></span><span>' + plural(ser.length) + ' rated</span>';
+  var rated = Object.keys(state.days).length;
+  ro.innerHTML = '<span>' + FLAME + ' Streak <b>' + plural(streak()) + '</b></span><span><b>' + plural(rated) + '</b> rated</span>';
 }
 
 function renderChips(){
