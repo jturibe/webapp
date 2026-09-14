@@ -27,8 +27,7 @@ html,body{ height:100%; margin:0; overflow:hidden; overscroll-behavior:none; bac
   font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,sans-serif; -webkit-text-size-adjust:100%;
   -webkit-user-select:none; user-select:none; }
 button{ font:inherit; color:inherit; cursor:pointer; }
-#app{ height:100%; display:flex; flex-direction:column; }
-@supports (height:100dvh){ #app{ height:100dvh; } }
+#app{ position:fixed; top:0; right:0; bottom:0; left:0; display:flex; flex-direction:column; }
 main{ flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; overscroll-behavior:contain;
   padding:calc(env(safe-area-inset-top) + 14px) calc(16px + env(safe-area-inset-right)) 28px calc(16px + env(safe-area-inset-left)); }
 main[hidden]{ display:none; }
@@ -58,11 +57,17 @@ h1{ margin:2px 0 0; font-size:32px; font-weight:800; letter-spacing:-.02em; }
 .score-delta span{ font-weight:500; color:var(--muted); }
 .readout svg{ width:14px; height:14px; color:var(--l0); vertical-align:-2px; }
 .card{ background:var(--card); border-radius:18px; padding:14px; margin-bottom:14px; }
-.chips{ display:flex; gap:6px; margin-bottom:10px; }
-.chip{ flex:1; min-height:36px; border-radius:10px; border:0; background:var(--bg); color:var(--muted); font-size:13px; font-weight:700; }
+.chips{ display:flex; gap:5px; margin-bottom:10px; }
+.chip{ flex:1; min-height:36px; padding:0; border-radius:10px; border:0; background:var(--bg); color:var(--muted); font-size:12px; font-weight:700; }
 .chip[aria-pressed="true"]{ background:var(--text); color:var(--bg); }
-#chart{ width:100%; }
+#chart{ width:100%; position:relative; touch-action:pan-y; }
 #chart svg{ display:block; width:100%; height:auto; }
+.scrub-line{ position:absolute; top:0; width:1.5px; background:var(--text); opacity:.5; pointer-events:none; display:none; }
+.scrub-dot{ position:absolute; width:12px; height:12px; border-radius:50%; border:2.5px solid var(--card); background:var(--text); transform:translate(-50%,-50%); pointer-events:none; display:none; box-shadow:0 1px 4px rgba(0,0,0,.3); }
+.scrub-tip{ position:absolute; top:0; transform:translateX(-50%); background:var(--text); color:var(--bg); border-radius:10px; padding:6px 10px; font-size:12px; font-weight:600; white-space:nowrap; pointer-events:none; display:none; }
+.scrub-tip .dot{ width:9px; height:9px; display:inline-block; vertical-align:-1px; margin-right:5px; }
+#chart.scrubbing .scrub-line, #chart.scrubbing .scrub-dot, #chart.scrubbing .scrub-tip{ display:block; }
+.score-date{ font-size:14px; font-weight:600; color:var(--muted); }
 .empty{ padding:40px 10px; text-align:center; color:var(--muted); font-size:15px; }
 .readout{ display:flex; justify-content:center; gap:22px; margin-top:8px; font-size:13px; color:var(--muted); font-variant-numeric:tabular-nums; }
 .readout b{ color:var(--text); font-weight:700; }
@@ -90,8 +95,9 @@ h1{ margin:2px 0 0; font-size:32px; font-weight:800; letter-spacing:-.02em; }
 .sq.none{ background:transparent; }
 .strip-title{ font-size:13px; font-weight:700; color:var(--muted); margin-bottom:6px; }
 
-nav.tabbar{ display:flex; border-top:1px solid var(--line); background:var(--card); padding-bottom:env(safe-area-inset-bottom); }
-nav.tabbar button{ flex:1; min-height:54px; border:0; background:none; color:var(--muted); font-size:12px; font-weight:700;
+nav.tabbar{ position:relative; display:flex; border-top:1px solid var(--line); background:var(--card); padding-bottom:env(safe-area-inset-bottom); }
+nav.tabbar::after{ content:""; position:absolute; top:100%; left:0; right:0; height:120px; background:var(--card); }
+nav.tabbar button{ flex:1; min-height:50px; border:0; background:none; color:var(--muted); font-size:12px; font-weight:700;
   display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; }
 nav.tabbar button svg{ width:24px; height:24px; }
 nav.tabbar button[aria-selected="true"]{ color:var(--text); }
@@ -206,11 +212,12 @@ var LEVELS = [
   { v: -2, label: 'Rough', c: 'var(--lm2)' }
 ];
 var RANGES = [
-  { label: '1M', days: 30 }, { label: '3M', days: 91 }, { label: '6M', days: 182 }, { label: '1Y', days: 365 }, { label: 'All', days: 0 }
+  { label: '1W', days: 7 }, { label: '1M', days: 30 }, { label: '3M', days: 91 }, { label: '6M', days: 182 }, { label: '1Y', days: 365 }, { label: 'All', days: 0 }
 ];
 var MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 var MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 var DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+var DAY2 = ['Su','Mo','Tu','We','Th','Fr','Sa'];
 
 function $(s){ return document.querySelector(s); }
 function levelOf(v){ for (var i = 0; i < LEVELS.length; i++) if (LEVELS[i].v === v) return LEVELS[i]; return null; }
@@ -309,7 +316,7 @@ function renderChart(){
   var el = $('#chart'), ro = $('#readout'), hd = $('#score-head');
   var ser = scoreSeries();
   if (ser.length < 2) {
-    hd.innerHTML = '';
+    chartGeo = null; hd.innerHTML = '';
     el.innerHTML = '<div class="empty">Rate a few days to see your score build up.</div>';
     ro.innerHTML = '';
     return;
@@ -333,10 +340,9 @@ function renderChart(){
   var ymax = Math.max(20, Math.min(100, Math.ceil(maxS / 20) * 20));
   function xOf(d){ return padL + (dayDiff(start, d) / (N - 1)) * pw; }
   function yOf(v){ return padT + (1 - v / ymax) * ph; }
+  chartGeo = { start: start, N: N, padL: padL, pw: pw, W: W, H: H, pts: pts, xOf: xOf, yOf: yOf, last: last, delta: delta, rangeLabel: rangeLabel };
 
-  hd.innerHTML = '<div class="score-num">' + Math.round(last.score) + '</div>' +
-    '<div class="score-delta ' + (delta > 0.5 ? 'up' : delta < -0.5 ? 'down' : '') + '">' +
-    (delta > 0.5 ? '\u25b2 ' : delta < -0.5 ? '\u25bc ' : '') + fmtDelta(delta) + ' <span>over ' + rangeLabel + '</span></div>';
+  renderScoreHead(null);
 
   var svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" xmlns="http://www.w3.org/2000/svg">';
   svg += '<defs><clipPath id="clip"><rect x="' + padL + '" y="0" width="' + pw + '" height="' + H + '"/></clipPath>' +
@@ -347,20 +353,32 @@ function renderChart(){
     svg += '<line x1="' + padL + '" x2="' + (W - padR) + '" y1="' + y + '" y2="' + y + '" stroke="var(--line)" stroke-width="1"/>';
     svg += '<text x="' + (padL - 8) + '" y="' + (y + 3.5) + '" text-anchor="end" font-size="10" fill="var(--muted)">' + Math.round(v) + '</text>';
   }
-  // month ticks
-  var ticks = [];
-  var m = new Date(start.getFullYear(), start.getMonth(), 1);
-  if (dayDiff(start, m) < 0) m = new Date(m.getFullYear(), m.getMonth() + 1, 1);
-  while (dayDiff(m, today) >= 0) { ticks.push(m); m = new Date(m.getFullYear(), m.getMonth() + 1, 1); }
-  var every = ticks.length > 13 ? 3 : ticks.length > 7 ? 2 : 1;
-  ticks.forEach(function(t, i){
-    var x = xOf(t);
-    svg += '<line x1="' + x + '" x2="' + x + '" y1="' + padT + '" y2="' + (padT + ph) + '" stroke="var(--line)" stroke-width="1"/>';
-    if (i % every === 0) {
-      var lab = MON[t.getMonth()] + (t.getMonth() === 0 || range === 0 || range > 182 ? ' ' + String(t.getFullYear()).slice(2) : '');
-      svg += '<text x="' + x + '" y="' + (H - 6) + '" text-anchor="middle" font-size="10" fill="var(--muted)">' + lab + '</text>';
+  // x ticks: per day for short ranges, per month otherwise
+  if (N <= 31) {
+    var step = N <= 14 ? 1 : 5;
+    for (var di = 0; di < N; di++) {
+      var dd = addDays(start, di), dx = xOf(dd);
+      svg += '<line x1="' + dx + '" x2="' + dx + '" y1="' + padT + '" y2="' + (padT + ph) + '" stroke="var(--line)" stroke-width="1"/>';
+      if (di % step === 0) {
+        var dl = N <= 14 ? DAY2[dd.getDay()] + ' ' + dd.getDate() : (dd.getDate() === 1 || di === 0 ? dd.getDate() + ' ' + MON[dd.getMonth()] : String(dd.getDate()));
+        svg += '<text x="' + dx + '" y="' + (H - 6) + '" text-anchor="middle" font-size="10" fill="var(--muted)">' + dl + '</text>';
+      }
     }
-  });
+  } else {
+    var ticks = [];
+    var m = new Date(start.getFullYear(), start.getMonth(), 1);
+    if (dayDiff(start, m) < 0) m = new Date(m.getFullYear(), m.getMonth() + 1, 1);
+    while (dayDiff(m, today) >= 0) { ticks.push(m); m = new Date(m.getFullYear(), m.getMonth() + 1, 1); }
+    var every = ticks.length > 13 ? 3 : ticks.length > 7 ? 2 : 1;
+    ticks.forEach(function(t, i){
+      var x = xOf(t);
+      svg += '<line x1="' + x + '" x2="' + x + '" y1="' + padT + '" y2="' + (padT + ph) + '" stroke="var(--line)" stroke-width="1"/>';
+      if (i % every === 0) {
+        var lab = MON[t.getMonth()] + (t.getMonth() === 0 || range === 0 || range > 182 ? ' ' + String(t.getFullYear()).slice(2) : '');
+        svg += '<text x="' + x + '" y="' + (H - 6) + '" text-anchor="middle" font-size="10" fill="var(--muted)">' + lab + '</text>';
+      }
+    });
+  }
   if (pts.length) {
     var line = '', first = null, lastX = 0;
     pts.forEach(function(p){
@@ -385,10 +403,48 @@ function renderChart(){
     svg += '<text x="' + (padL + pw / 2) + '" y="' + (padT + ph / 2) + '" text-anchor="middle" font-size="13" fill="var(--muted)">No rated days in this range</text>';
   }
   svg += '</svg>';
-  el.innerHTML = svg;
+  el.innerHTML = svg + '<div class="scrub-line" style="height:' + (padT + ph) + 'px"></div><div class="scrub-dot"></div><div class="scrub-tip"></div>';
+  el.classList.remove('scrubbing');
 
   var rated = Object.keys(state.days).length;
   ro.innerHTML = '<span>' + FLAME + ' Streak <b>' + plural(streak()) + '</b></span><span><b>' + plural(rated) + '</b> rated</span>';
+}
+
+var chartGeo = null;
+function renderScoreHead(p){
+  var hd = $('#score-head'), g = chartGeo;
+  if (!g) { hd.innerHTML = ''; return; }
+  if (p) {
+    hd.innerHTML = '<div class="score-num">' + Math.round(p.score) + '</div><div class="score-date">' + longDate(p.d) + '</div>';
+    return;
+  }
+  var delta = g.delta;
+  hd.innerHTML = '<div class="score-num">' + Math.round(g.last.score) + '</div>' +
+    '<div class="score-delta ' + (delta > 0.5 ? 'up' : delta < -0.5 ? 'down' : '') + '">' +
+    (delta > 0.5 ? '\u25b2 ' : delta < -0.5 ? '\u25bc ' : '') + fmtDelta(delta) + ' <span>over ' + g.rangeLabel + '</span></div>';
+}
+function scrubAt(clientX){
+  var g = chartGeo, el = $('#chart'); if (!g || !g.pts.length) return;
+  var rect = el.getBoundingClientRect();
+  var x = (clientX - rect.left) * (g.W / rect.width);
+  var idx = Math.round((x - g.padL) / g.pw * (g.N - 1));
+  var best = null, bestD = 1e9;
+  g.pts.forEach(function(p){ var dd = Math.abs(dayDiff(g.start, p.d) - idx); if (dd < bestD) { bestD = dd; best = p; } });
+  if (!best) return;
+  var px = g.xOf(best.d) * (rect.width / g.W), py = g.yOf(best.score) * (rect.height / g.H);
+  el.classList.add('scrubbing');
+  el.querySelector('.scrub-line').style.left = px + 'px';
+  var dot = el.querySelector('.scrub-dot'); dot.style.left = px + 'px'; dot.style.top = py + 'px';
+  var tip = el.querySelector('.scrub-tip');
+  tip.innerHTML = (best.x === undefined ? 'Not rated' : '<span class="dot" style="background:' + colorOf(best.x) + '"></span>' + levelOf(best.x).label) +
+    ' \u00b7 ' + Math.round(best.score);
+  var tw = tip.offsetWidth || 90, tx = Math.max(tw / 2 + 2, Math.min(rect.width - tw / 2 - 2, px));
+  tip.style.left = tx + 'px';
+  renderScoreHead(best);
+}
+function scrubEnd(){
+  var el = $('#chart'); el.classList.remove('scrubbing');
+  renderScoreHead(null);
 }
 
 function renderChips(){
@@ -546,6 +602,13 @@ $('#backup-btn').addEventListener('click', function(){ $('#backup-msg').textCont
 $('#export-btn').addEventListener('click', doExport);
 $('#import-merge').addEventListener('click', function(){ doImport(false); });
 $('#import-replace').addEventListener('click', function(){ doImport(true); });
+
+(function(){
+  var el = $('#chart'), active = false;
+  el.addEventListener('pointerdown', function(e){ active = true; scrubAt(e.clientX); });
+  el.addEventListener('pointermove', function(e){ if (active) scrubAt(e.clientX); });
+  ['pointerup', 'pointercancel', 'pointerleave'].forEach(function(t){ el.addEventListener(t, function(){ if (active) { active = false; scrubEnd(); } }); });
+})();
 
 window.addEventListener('resize', function(){ if (!$('#view-progress').hidden) renderChart(); });
 document.addEventListener('visibilitychange', function(){
